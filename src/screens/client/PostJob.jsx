@@ -28,6 +28,8 @@ export default function PostJob() {
   const [loadingAddr, setLoadingAddr] = useState(false)
   const [loading, setLoading] = useState(false)
   const mapRef = useRef(null)
+  const mapInstanceRef = useRef(null)
+  const markerRef = useRef(null)
 
   const fetchAddress = async (la, ln) => {
     setLoadingAddr(true)
@@ -54,9 +56,11 @@ export default function PostJob() {
     const L = window.L
     if (!L) return
     const map = L.map(mapRef.current, { center: [lat, lng], zoom: 13, zoomControl: false, attributionControl: false })
+    mapInstanceRef.current = map
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map)
     const icon = L.divIcon({ html: `<div style="font-size:32px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3))">📍</div>`, iconSize: [32, 32], iconAnchor: [16, 28], className: '' })
     const marker = L.marker([lat, lng], { icon, draggable: false }).addTo(map)
+    markerRef.current = marker
     map.on('click', (e) => {
       const { lat, lng } = e.latlng
       setLat(lat); setLng(lng)
@@ -64,8 +68,35 @@ export default function PostJob() {
       fetchAddress(lat, lng)
     })
     setTimeout(() => map.invalidateSize(), 150)
-    return () => map.remove()
+    return () => {
+      map.remove()
+      mapInstanceRef.current = null
+      markerRef.current = null
+    }
   }, [showMap])
+
+  const handleMyLocation = () => {
+    if (!navigator.geolocation) {
+      alert(t("Brauzeringiz joylashuvni aniqlashni qo'llab-quvvatlamaydi"))
+      return
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords
+        setLat(latitude)
+        setLng(longitude)
+        if (mapInstanceRef.current && markerRef.current) {
+          mapInstanceRef.current.flyTo([latitude, longitude], 16, { duration: 1 })
+          markerRef.current.setLatLng([latitude, longitude])
+        }
+        fetchAddress(latitude, longitude)
+      },
+      (err) => {
+        alert(t("Joylashuvni aniqlab bo'lmadi. Ruxsat berilganiga ishonch hosil qiling."))
+      },
+      { enableHighAccuracy: true }
+    )
+  }
 
   useEffect(() => { if (editJobId) fetchEditJob() }, [editJobId])
 
@@ -184,6 +215,12 @@ export default function PostJob() {
               </div>
             </div>
           </div>
+          <button onClick={handleMyLocation} className="absolute bottom-20 right-4 w-12 h-12 bg-white rounded-2xl shadow-xl flex items-center justify-center text-[#1E6FD9] z-[1000] border border-[#E8EDF5] active:scale-95 transition-all">
+            <svg viewBox="0 0 24 24" className="w-6 h-6 stroke-current fill-none stroke-2 stroke-linecap-round stroke-linejoin-round">
+              <circle cx="12" cy="12" r="10"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-[#1E293B]/90 backdrop-blur px-4 py-2 rounded-full shadow-lg border border-white/10 text-white font-bold text-[11px] z-[1000] pointer-events-none">
             {t('Nuqtani belgilash uchun xaritani bosing')}
           </div>

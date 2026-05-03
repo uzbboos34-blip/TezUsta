@@ -74,7 +74,7 @@ export default function WorkerProfile() {
   )
 
   const content = (
-    <div className="flex flex-col gap-4 p-5 lg:p-8">
+    <div className="flex flex-col gap-3">
       {/* Balance card */}
       <InfoCard>
         <div className="flex justify-between items-center mb-4">
@@ -185,7 +185,7 @@ export default function WorkerProfile() {
             {(user?.rating || 0).toFixed(1)} {t('reyting')}
           </div>
         </div>
-        <div className="px-[18px] pb-6 -mt-[26px] z-10">
+        <div className="px-4 pb-6 -mt-[26px] z-10">
           {content}
         </div>
       </div>

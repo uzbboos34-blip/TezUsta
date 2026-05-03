@@ -12,6 +12,53 @@ export default function JobDetail() {
   const [loading, setLoading] = useState(true)
   const mapRef = useRef(null)
   const mapRefDesktop = useRef(null)
+  const mapInstanceRef = useRef(null)
+  const mapDesktopInstanceRef = useRef(null)
+  const workerMarkerRef = useRef(null)
+  const workerMarkerDesktopRef = useRef(null)
+  const [workerLocation, setWorkerLocation] = useState(null)
+  const [distanceKm, setDistanceKm] = useState(null)
+  const [locLoading, setLocLoading] = useState(false)
+
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371
+    const dLat = (lat2 - lat1) * Math.PI / 180
+    const dLon = (lon2 - lon1) * Math.PI / 180
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2)
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+    return R * c
+  }
+
+  const handleMyLocation = () => {
+    if (!navigator.geolocation) {
+      alert(t("Brauzeringiz joylashuvni aniqlashni qo'llab-quvvatlamaydi"))
+      return
+    }
+    setLocLoading(true)
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords
+        setWorkerLocation([latitude, longitude])
+        if (j && j.lat && j.lng) {
+          const dist = calculateDistance(latitude, longitude, j.lat, j.lng)
+          setDistanceKm(dist.toFixed(1))
+        }
+        
+        // Fly to location
+        if (mapInstanceRef.current) mapInstanceRef.current.flyTo([latitude, longitude], 15)
+        if (mapDesktopInstanceRef.current) mapDesktopInstanceRef.current.flyTo([latitude, longitude], 15)
+        
+        setLocLoading(false)
+      },
+      (err) => {
+        alert(t("Joylashuvni aniqlab bo'lmadi. Ruxsat berilganiga ishonch hosil qiling."))
+        setLocLoading(false)
+      },
+      { enableHighAccuracy: true }
+    )
+  }
 
   const fetchJob = async (showLoading = true) => {
     if (showLoading) setLoading(true)
@@ -36,7 +83,7 @@ export default function JobDetail() {
     }
   }, [currentJobId])
 
-  const initMap = (ref, canSee) => {
+  const initMap = (ref, canSee, isDesktop = false) => {
     if (!j || !ref.current) return
     const L = window.L
     if (!L) return
@@ -44,19 +91,43 @@ export default function JobDetail() {
     const fLat = coords[0] + (Math.random() - 0.5) * 0.005
     const fLng = coords[1] + (Math.random() - 0.5) * 0.005
     const center = canSee ? coords : [fLat, fLng]
-    const map = L.map(ref.current, { center, zoom: 15, zoomControl: false, attributionControl: false, scrollWheelZoom: false })
+    
+    // Auto-center map between job and worker if worker location is known
+    let finalCenter = center;
+    let finalZoom = 15;
+    if (canSee && workerLocation) {
+      finalCenter = [(coords[0] + workerLocation[0]) / 2, (coords[1] + workerLocation[1]) / 2]
+      finalZoom = 13 // Zoom out slightly to see both
+    }
+
+    const map = L.map(ref.current, { center: finalCenter, zoom: finalZoom, zoomControl: false, attributionControl: false, scrollWheelZoom: false })
+    if (isDesktop) mapDesktopInstanceRef.current = map
+    else mapInstanceRef.current = map
+
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map)
     L.control.zoom({ position: 'topright' }).addTo(map)
+    
     if (canSee) {
       const icon = L.divIcon({ html: `<div style="background:linear-gradient(135deg,#1E6FD9,#1251C5);width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.3)"></div>`, iconSize: [32, 32], iconAnchor: [16, 32], className: '' })
       L.marker(coords, { icon }).addTo(map)
+
+      if (workerLocation) {
+        const wIcon = L.divIcon({ html: `<div style="background:#22C55E;width:16px;height:16px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 4px rgba(34,197,94,0.3)"></div>`, iconSize: [16, 16], iconAnchor: [8, 8], className: '' })
+        const wMarker = L.marker(workerLocation, { icon: wIcon }).addTo(map)
+        if (isDesktop) workerMarkerDesktopRef.current = wMarker
+        else workerMarkerRef.current = wMarker
+      }
     } else {
       L.circle([fLat, fLng], { radius: 400, color: '#1E6FD9', fillColor: '#1E6FD9', fillOpacity: 0.1, weight: 2, dashArray: '6 4', opacity: 0.5 }).addTo(map)
       const icon = L.divIcon({ html: `<div style="font-size:28px;filter:blur(1.5px)">📍</div>`, iconSize: [30, 30], iconAnchor: [15, 28], className: '' })
       L.marker([fLat, fLng], { icon, interactive: false }).addTo(map)
     }
     setTimeout(() => map.invalidateSize(), 120)
-    return () => map.remove()
+    return () => {
+      map.remove()
+      if (isDesktop) { mapDesktopInstanceRef.current = null; workerMarkerDesktopRef.current = null }
+      else { mapInstanceRef.current = null; workerMarkerRef.current = null }
+    }
   }
 
   const canSeeInfo = (j && user?.id && (j.workerId === user.id || j.hasApplied || j.isMine))
@@ -66,14 +137,14 @@ export default function JobDetail() {
     if (!j) return
     const canSee = (user?.id && (j.workerId === user.id || j.hasApplied || j.isMine))
     setShowExact(canSee)
-    return initMap(mapRef, canSee)
-  }, [j?.id, user?.id, j?.workerId, j?.hasApplied, showExact])
+    return initMap(mapRef, canSee, false)
+  }, [j?.id, user?.id, j?.workerId, j?.hasApplied, showExact, workerLocation])
 
   useEffect(() => {
     if (!j) return
     const canSee = (user?.id && (j.workerId === user.id || j.hasApplied || j.isMine))
-    return initMap(mapRefDesktop, canSee)
-  }, [j?.id, user?.id, j?.workerId, j?.hasApplied])
+    return initMap(mapRefDesktop, canSee, true)
+  }, [j?.id, user?.id, j?.workerId, j?.hasApplied, workerLocation])
 
   if (loading) return <div className="flex-1 flex items-center justify-center bg-[#F4F7FB] text-[#718096]">{t('Yuklanmoqda...')}</div>
   if (!j) return null
@@ -242,7 +313,14 @@ export default function JobDetail() {
           <div className="h-[210px] relative overflow-hidden shrink-0">
             <div ref={mapRef} className="w-full h-full" />
             {showExact && <div className="absolute top-2.5 left-1/2 -translate-x-1/2 bg-[rgba(18,81,197,0.9)] text-white text-[11px] font-semibold px-3 py-1.5 rounded-full z-[800] backdrop-blur-sm whitespace-nowrap">📍 {t('Aniq manzil')}</div>}
-            {showExact && <div className="absolute bottom-2.5 left-2.5 bg-[rgba(34,197,94,0.9)] text-white rounded-lg px-2.5 py-1.5 text-[12px] font-bold z-[800] backdrop-blur-sm">📍 {j.dist || '---'}</div>}
+            {showExact && <div className="absolute bottom-2.5 left-2.5 bg-[rgba(34,197,94,0.9)] text-white rounded-lg px-2.5 py-1.5 text-[12px] font-bold z-[800] backdrop-blur-sm">📍 {distanceKm ? `${distanceKm} km (Sizdan)` : j.dist || '---'}</div>}
+            
+            <button onClick={handleMyLocation} className="absolute bottom-14 right-2.5 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-[#1E6FD9] z-[800] border border-[#E8EDF5] active:scale-95 transition-all">
+              <svg viewBox="0 0 24 24" className={`w-5 h-5 stroke-current fill-none stroke-2 stroke-linecap-round stroke-linejoin-round ${locLoading ? 'animate-spin' : ''}`}>
+                <circle cx="12" cy="12" r="10"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
             {showExact && <button onClick={openNav} className="absolute bottom-2.5 right-2.5 bg-white rounded-xl px-3 py-2 text-[12px] font-bold text-[#1E6FD9] flex items-center gap-1 shadow-md z-[800] hover:bg-gray-50"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polygon points="3 11 22 2 13 21 11 13 3 11" /></svg> {t("Yo'nalish")}</button>}
             {!showExact && (
               <>
@@ -271,7 +349,7 @@ export default function JobDetail() {
             <div className="bg-white rounded-2xl border border-[#E8EDF5] shadow-sm">
               <InfoRow label={t('Manzil')} value={canSeeInfo && j.status !== 'done' ? j.addr : <LockedBadge />} />
               <InfoRow label={t('Telefon')} value={canSeeInfo && j.status !== 'done' ? j.phone : <LockedBadge />} />
-              <InfoRow label={t('Masofa')} value={`📍 ${j.dist || '---'}`} />
+              <InfoRow label={t('Masofa')} value={`📍 ${distanceKm ? `${distanceKm} km (Sizdan)` : j.dist || '---'}`} />
               <InfoRow label={t("To'lov")} value={`💵 ${t('Naqd')}`} />
             </div>
             <ActionButtons />
@@ -309,6 +387,12 @@ export default function JobDetail() {
               <div className="rounded-2xl overflow-hidden h-[300px] relative border border-[#E8EDF5] shadow-sm">
                 <div ref={mapRefDesktop} className="w-full h-full" />
                 {canSeeInfo && <div className="absolute top-3 left-1/2 -translate-x-1/2 bg-[rgba(18,81,197,0.9)] text-white text-[11px] font-semibold px-3 py-1.5 rounded-full z-[800] backdrop-blur-sm whitespace-nowrap">📍 {t('Aniq manzil')}</div>}
+                <button onClick={handleMyLocation} className="absolute bottom-16 right-3 w-10 h-10 bg-white rounded-xl shadow-md flex items-center justify-center text-[#1E6FD9] z-[800] border border-[#E8EDF5] hover:bg-gray-50 transition-colors">
+                  <svg viewBox="0 0 24 24" className={`w-5 h-5 stroke-current fill-none stroke-2 stroke-linecap-round stroke-linejoin-round ${locLoading ? 'animate-spin' : ''}`}>
+                    <circle cx="12" cy="12" r="10"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
                 {canSeeInfo && <button onClick={openNav} className="absolute bottom-3 right-3 bg-white rounded-xl px-3 py-2 text-[12px] font-bold text-[#1E6FD9] flex items-center gap-1 shadow-md z-[800] hover:bg-gray-50 transition-colors"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polygon points="3 11 22 2 13 21 11 13 3 11" /></svg> {t("Yo'nalish")}</button>}
                 {!canSeeInfo && (
                   <div className="absolute inset-0 bg-slate-900/70 flex flex-col items-center justify-center z-[900] backdrop-blur-[6px]">
@@ -337,7 +421,7 @@ export default function JobDetail() {
                   </div>
                   <div className="p-4 border-r border-[#F1F5F9]">
                     <div className="text-[11px] text-[#94A3B8] font-bold uppercase tracking-wider mb-1">{t('Masofa')}</div>
-                    <div className="text-[14px] font-semibold text-[#1A202C]">📍 {j.dist || '---'}</div>
+                    <div className="text-[14px] font-semibold text-[#1A202C]">📍 {distanceKm ? `${distanceKm} km (Sizdan)` : j.dist || '---'}</div>
                   </div>
                   <div className="p-4">
                     <div className="text-[11px] text-[#94A3B8] font-bold uppercase tracking-wider mb-1">{t("To'lov")}</div>
