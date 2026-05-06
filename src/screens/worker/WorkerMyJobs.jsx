@@ -143,6 +143,16 @@ export default function WorkerMyJobs() {
               {t("Qabul qilgan va bajargan ishlaringiz")}
             </div>
           </div>
+          <div className="relative">
+            <select value={state.lang} onChange={e => dispatch({ type: 'SET_LANG', lang: e.target.value })} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full appearance-none">
+              <option value="uz">UZ</option>
+              <option value="kir">КР</option>
+              <option value="ru">RU</option>
+            </select>
+            <div className="bg-white/20 text-white font-bold py-1.5 px-3 rounded-lg text-[13px] flex items-center gap-1">
+              🌍 {state.lang.toUpperCase()}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -155,6 +165,16 @@ export default function WorkerMyJobs() {
           <p className="text-[13px] text-[#718096] mt-0.5">
             {t("Qabul qilgan va bajargan ishlaringiz")}
           </p>
+        </div>
+        <div className="relative">
+          <select value={state.lang} onChange={e => dispatch({ type: 'SET_LANG', lang: e.target.value })} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full appearance-none">
+            <option value="uz">O'zbek</option>
+            <option value="kir">Ўзбекcha</option>
+            <option value="ru">Русский</option>
+          </select>
+          <div className="bg-[#F4F7FB] border border-[#E8EDF5] text-[#1A202C] font-bold py-2 px-4 rounded-xl text-[13px] flex items-center gap-2 hover:bg-gray-50 transition-colors">
+            🌍 {state.lang.toUpperCase()}
+          </div>
         </div>
       </div>
 

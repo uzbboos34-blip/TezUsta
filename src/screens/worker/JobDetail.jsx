@@ -293,6 +293,16 @@ export default function JobDetail() {
             <button onClick={goBack} className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
               <svg viewBox="0 0 24 24" className="w-[19px] h-[19px] stroke-white stroke-2 fill-none stroke-linecap-round"><polyline points="15 18 9 12 15 6" /></svg>
             </button>
+            <div className="relative">
+              <select value={state.lang} onChange={e => dispatch({ type: 'SET_LANG', lang: e.target.value })} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full appearance-none">
+                <option value="uz">UZ</option>
+                <option value="kir">КР</option>
+                <option value="ru">RU</option>
+              </select>
+              <div className="bg-white/20 text-white font-bold py-1.5 px-3 rounded-lg text-[13px] flex items-center gap-1">
+                🌍 {state.lang.toUpperCase()}
+              </div>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <div className="text-[36px] shrink-0">{j.icon}</div>
@@ -359,22 +369,34 @@ export default function JobDetail() {
 
       {/* ── DESKTOP ── */}
       <div className="hidden lg:flex flex-col flex-1 overflow-hidden">
-        <div className="flex items-center gap-4 px-8 py-5 bg-white border-b border-[#E8EDF5] shrink-0">
-          <button onClick={goBack} className="w-9 h-9 bg-[#F4F7FB] rounded-xl flex items-center justify-center hover:bg-[#E8EDF5] transition-colors border border-[#E8EDF5]">
-            <svg viewBox="0 0 24 24" className="w-[18px] h-[18px] stroke-[#475569] stroke-2 fill-none stroke-linecap-round"><polyline points="15 18 9 12 15 6" /></svg>
-          </button>
-          <div className="flex items-center gap-3">
-            <div className="text-[30px]">{j.icon}</div>
-            <div>
-              <h1 className="text-[20px] font-extrabold text-[#1A202C]">{j.title}</h1>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-[13px] text-[#718096]">{getCatName(j.cat)} · {j.date}</span>
-                {j.requiredWorkers > 1 && (
-                  <span className="bg-[#FEF9C3] text-[#CA8A04] px-2 py-0.5 rounded-full text-[11px] font-bold">
-                    👥 {j.acceptedWorkersCount || 0}/{j.requiredWorkers}
-                  </span>
-                )}
+        <div className="flex items-center justify-between px-8 py-5 bg-white border-b border-[#E8EDF5] shrink-0">
+          <div className="flex items-center gap-4">
+            <button onClick={goBack} className="w-9 h-9 bg-[#F4F7FB] rounded-xl flex items-center justify-center hover:bg-[#E8EDF5] transition-colors border border-[#E8EDF5]">
+              <svg viewBox="0 0 24 24" className="w-[18px] h-[18px] stroke-[#475569] stroke-2 fill-none stroke-linecap-round"><polyline points="15 18 9 12 15 6" /></svg>
+            </button>
+            <div className="flex items-center gap-3">
+              <div className="text-[30px]">{j.icon}</div>
+              <div>
+                <h1 className="text-[20px] font-extrabold text-[#1A202C]">{j.title}</h1>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-[13px] text-[#718096]">{getCatName(j.cat)} · {j.date}</span>
+                  {j.requiredWorkers > 1 && (
+                    <span className="bg-[#FEF9C3] text-[#CA8A04] px-2 py-0.5 rounded-full text-[11px] font-bold">
+                      👥 {j.acceptedWorkersCount || 0}/{j.requiredWorkers}
+                    </span>
+                  )}
+                </div>
               </div>
+            </div>
+          </div>
+          <div className="relative">
+            <select value={state.lang} onChange={e => dispatch({ type: 'SET_LANG', lang: e.target.value })} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full appearance-none">
+              <option value="uz">O'zbek</option>
+              <option value="kir">Ўзбекча</option>
+              <option value="ru">Русский</option>
+            </select>
+            <div className="bg-[#F4F7FB] border border-[#E8EDF5] text-[#1A202C] font-bold py-2 px-4 rounded-xl text-[13px] flex items-center gap-2 hover:bg-gray-50 transition-colors">
+              🌍 {state.lang.toUpperCase()}
             </div>
           </div>
         </div>

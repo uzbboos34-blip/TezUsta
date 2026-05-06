@@ -1,4 +1,4 @@
-// TezUsta – App State / Database (in-memory demo)
+// zentro – App State / Database (in-memory demo)
 
 export const DB = {
   users: [
@@ -21,7 +21,7 @@ export const DB = {
   admins: [
     { id:6, name:'Admin Adminov', phone:'+998901000000', addedBy:'superadmin' }
   ],
-  settings: { commission:5, minBalance:5000, paymentCard:'8600 1234 5678 9012', cardHolder:'TezUsta LLC' },
+  settings: { commission:5, minBalance:5000, paymentCard:'8600 1234 5678 9012', cardHolder:'zentro LLC' },
   logs: [
     { id: 1, date: 'Bugun, 10:15', by: 'Admin Adminov', action: "Yangi usta qo'shildi" }
   ],

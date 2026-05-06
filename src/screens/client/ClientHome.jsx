@@ -156,6 +156,16 @@ export default function ClientHome() {
             {t("Mening ishlarim")}
           </h1>
           <div className="flex items-center gap-2">
+            <div className="relative">
+              <select value={state.lang} onChange={e => dispatch({ type: 'SET_LANG', lang: e.target.value })} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full appearance-none">
+                <option value="uz">UZ</option>
+                <option value="kir">КР</option>
+                <option value="ru">RU</option>
+              </select>
+              <div className="bg-white/20 text-white font-bold py-1.5 px-3 rounded-lg text-[13px] flex items-center gap-1">
+                🌍 {state.lang.toUpperCase()}
+              </div>
+            </div>
             <button onClick={() => dispatch({ type: 'SHOW_MODAL', modal: { type: 'general', data: { icon: '🔔', title: t("Bildirishnomalar"), sub: t("Hozircha yangi bildirishnomalar yo'q") } } })} className="relative w-9 h-9 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
               <svg viewBox="0 0 24 24" className="w-5 h-5 stroke-white fill-none stroke-2 stroke-linecap-round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#22C55E] rounded-full border border-[#1251C5]"></span>
@@ -203,13 +213,25 @@ export default function ClientHome() {
             ))}
           </div>
         </div>
-        <button 
-          onClick={() => dispatch({ type: 'GO', screen: 'post-job' })}
-          className="bg-[#1E6FD9] text-white px-6 py-3 rounded-2xl font-extrabold text-[14px] shadow-lg shadow-blue-100 hover:bg-[#1251C5] transition-all active:scale-95 flex items-center gap-2"
-        >
-          <svg viewBox="0 0 24 24" className="w-5 h-5 stroke-current fill-none stroke-[3] stroke-linecap-round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-          {t("Yangi ish e'lon qilish")}
-        </button>
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <select value={state.lang} onChange={e => dispatch({ type: 'SET_LANG', lang: e.target.value })} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full appearance-none">
+              <option value="uz">O'zbek</option>
+              <option value="kir">Ўзбекча</option>
+              <option value="ru">Русский</option>
+            </select>
+            <div className="bg-[#F4F7FB] border border-[#E8EDF5] text-[#1A202C] font-bold py-2 px-4 rounded-xl text-[13px] flex items-center gap-2 hover:bg-gray-50 transition-colors">
+              🌍 {state.lang.toUpperCase()}
+            </div>
+          </div>
+          <button 
+            onClick={() => dispatch({ type: 'GO', screen: 'post-job' })}
+            className="bg-[#1E6FD9] text-white px-6 py-3 rounded-2xl font-extrabold text-[14px] shadow-lg shadow-blue-100 hover:bg-[#1251C5] transition-all active:scale-95 flex items-center gap-2"
+          >
+            <svg viewBox="0 0 24 24" className="w-5 h-5 stroke-current fill-none stroke-[3] stroke-linecap-round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+            {t("Yangi ish e'lon qilish")}
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-5 lg:p-8 no-scroll">

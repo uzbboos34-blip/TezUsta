@@ -9,15 +9,7 @@ const STATUS = {
   cancelled:  { label: 'Bekor',     cls: 'bg-red-50 text-red-500' },
 }
 
-export default function SAJobs({ t, fmt, getCatName, jobs, pages, totals, changePage }) {
-  const [search, setSearch] = useState('')
-
-  const filteredJobs = jobs.filter(j => 
-    j.title?.toLowerCase().includes(search.toLowerCase()) ||
-    getCatName(j.cat)?.toLowerCase().includes(search.toLowerCase()) ||
-    j.client?.name?.toLowerCase().includes(search.toLowerCase()) ||
-    j.worker?.name?.toLowerCase().includes(search.toLowerCase())
-  )
+export default function SAJobs({ t, fmt, getCatName, jobs, pages, totals, changePage, searchQueries, handleSearch }) {
   return (
     <div className="p-6 lg:p-8 flex flex-col gap-5">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -29,8 +21,8 @@ export default function SAJobs({ t, fmt, getCatName, jobs, pages, totals, change
         <div className="relative w-full md:w-80 group">
           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[18px] opacity-40 group-focus-within:opacity-100 transition-opacity">🔍</span>
           <input 
-            value={search} 
-            onChange={e => setSearch(e.target.value)} 
+            value={searchQueries.jobs} 
+            onChange={e => handleSearch('jobs', e.target.value)} 
             placeholder={t("Ishlardan qidirish...")} 
             className="w-full bg-white border border-[#E8EDF5] rounded-2xl pl-12 pr-4 py-3 text-[13px] font-bold outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-500/5 transition-all shadow-sm" 
           />
@@ -50,12 +42,12 @@ export default function SAJobs({ t, fmt, getCatName, jobs, pages, totals, change
           </div>
 
           <div className="divide-y divide-[#F1F5F9] min-w-[600px]">
-            {filteredJobs.length === 0 ? (
+            {jobs.length === 0 ? (
               <div className="py-20 text-center">
-                 <div className="text-[40px] mb-2 opacity-20">{search ? '🖎' : '💼'}</div>
-                 <div className="text-[#A0AEC0] font-bold text-[15px]">{search ? t("Natija topilmadi") : t("Ishlar topilmadi")}</div>
+                 <div className="text-[40px] mb-2 opacity-20">{searchQueries.jobs ? '🖎' : '💼'}</div>
+                 <div className="text-[#A0AEC0] font-bold text-[15px]">{searchQueries.jobs ? t("Natija topilmadi") : t("Ishlar topilmadi")}</div>
               </div>
-            ) : filteredJobs.map(j => {
+            ) : jobs.map(j => {
               const st = STATUS[j.status] || { label: j.status, cls: 'bg-gray-100 text-gray-500' }
               return (
                 <div key={j.id} className="grid grid-cols-[2fr_1fr_1.5fr_1.5fr_1fr_1fr] gap-4 items-center px-5 py-4 hover:bg-[#F8FAFC] transition-colors">

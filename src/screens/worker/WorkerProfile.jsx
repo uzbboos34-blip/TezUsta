@@ -157,6 +157,10 @@ export default function WorkerProfile() {
         </div>
       </InfoCard>
 
+      <button onClick={() => dispatch({ type: 'SHOW_MODAL', modal: { type: 'operator' } })} className="w-full bg-white text-[#1A202C] border border-[#E8EDF5] font-black py-4 rounded-2xl hover:bg-gray-50 transition-all shadow-sm active:scale-95 text-[14px] mb-2">
+        🎧 {t('Operator')}
+      </button>
+
       <button onClick={logout} className="w-full bg-red-50 text-[#DC2626] font-black py-4 rounded-2xl hover:bg-red-100 transition-all shadow-sm active:scale-95">
         {t('🚪 Chiqish')}
       </button>
@@ -224,6 +228,12 @@ export default function WorkerProfile() {
                   <div className="text-[22px] font-black text-[#1A202C]">{fmt(user?.balance || 0)}</div>
                   <div className="text-[11px] text-[#718096]">{t("so'm")}</div>
                 </div>
+              </div>
+              <div className="w-full mb-3">
+                <button onClick={() => dispatch({ type: 'SHOW_MODAL', modal: { type: 'operator' } })}
+                  className="w-full bg-white text-[#1A202C] border border-[#E8EDF5] font-bold py-3 rounded-2xl hover:bg-gray-50 transition-colors shadow-sm flex items-center justify-center gap-2 text-[14px]">
+                  🎧 {t('Operator')}
+                </button>
               </div>
               <button onClick={logout} className="w-full bg-red-50 text-[#DC2626] font-black py-3 rounded-2xl hover:bg-red-100 transition-all shadow-sm text-[14px]">
                 {t('🚪 Chiqish')}

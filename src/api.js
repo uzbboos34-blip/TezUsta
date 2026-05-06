@@ -15,13 +15,16 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 errors
+// Handle 401 errors — only logout if it's NOT a login/register call
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const url = error.config?.url || '';
+    const isAuthCall = url.includes('login') || url.includes('register');
+    if (error.response?.status === 401 && !isAuthCall) {
       localStorage.removeItem('token');
-      window.location.href = '/'; // Go to start/login
+      // Fire a custom event so the app can handle logout gracefully
+      window.dispatchEvent(new CustomEvent('app:logout'));
     }
     return Promise.reject(error);
   }
@@ -45,7 +48,7 @@ export const usersApi = {
 };
 
 export const jobsApi = {
-  getAll: (cat, mine) => api.get('/jobs', { params: { cat, mine } }),
+  getAll: (params) => api.get('/jobs', { params }),
   getOne: (id) => api.get(`/jobs/${id}`),
   create: (data) => api.post('/jobs', data),
   apply: (id) => api.post(`/jobs/${id}/apply`),
@@ -65,20 +68,20 @@ export const chatsApi = {
 };
 
 export const adminApi = {
-  getLogs: (page) => api.get('/admin/logs', { params: { page } }),
-  getUsers: (page) => api.get('/admin/users', { params: { page } }),
-  getJobs: (page) => api.get('/admin/jobs', { params: { page } }),
-  getUserJobs: (id, page) => api.get(`/admin/users/${id}/jobs`, { params: { page } }),
-  getTransactions: (page) => api.get('/admin/transactions', { params: { page } }),
+  getLogs: (page, q) => api.get('/admin/logs', { params: { page, q } }),
+  getUsers: (page, q, region, district) => api.get('/admin/users', { params: { page, q, region, district } }),
+  getJobs: (page, q, region, district) => api.get('/admin/jobs', { params: { page, q, region, district } }),
+  getUserJobs: (id, page, q) => api.get(`/admin/users/${id}/jobs`, { params: { page, q } }),
+  getTransactions: (page, q) => api.get('/admin/transactions', { params: { page, q } }),
   blockUser: (id, reason, days) => api.post(`/admin/users/${id}/block`, { reason, days }),
   unblockUser: (id) => api.post(`/admin/users/${id}/unblock`),
   restoreUser: (id) => api.post(`/admin/users/${id}/restore`),
   deleteUser: (id) => api.post(`/admin/users/${id}/delete`),
   createAdmin: (data) => api.post('/admin/users/admins', data),
-  getPayments: (page) => api.get('/admin/payments', { params: { page } }),
+  getPayments: (page, q) => api.get('/admin/payments', { params: { page, q } }),
   approvePayment: (id) => api.post(`/admin/payments/${id}/approve`),
   rejectPayment: (id) => api.post(`/admin/payments/${id}/reject`),
-  getCategories: () => api.get('/users/categories'),
+  getCategories: (q) => api.get('/admin/categories', { params: { q } }),
   createCategory: (data) => api.post('/admin/categories', data),
   updateCategory: (id, data) => api.patch(`/admin/categories/${id}`, data),
   deleteCategory: (id) => api.delete(`/admin/categories/${id}`),

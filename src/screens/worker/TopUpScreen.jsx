@@ -79,15 +79,19 @@ export default function TopUpScreen() {
     reader.readAsDataURL(file)
   }
 
+  const [submitting, setSubmitting] = useState(false)
+
   const submitRequest = async () => {
+    if (submitting) return
     if (!checkImg && !checkNote.trim()) {
       dispatch({ type: 'SHOW_MODAL', modal: { type: 'general', data: { icon: '⚠️', title: t('Chek yuklanmadi'), sub: t('Iltimos, chek rasmini yuklang yoki izoh yozing.') } } })
       return
     }
+    setSubmitting(true)
     try {
       const res = await usersApi.topupRequest({
         amount: Number(amount),
-        checkImg: checkImg.data,
+        checkImg: checkImg?.data,
         note: checkNote,
       })
       
@@ -102,6 +106,8 @@ export default function TopUpScreen() {
       }
     } catch (e) {
       dispatch({ type: 'SHOW_MODAL', modal: { type: 'general', data: { icon: '❌', title: t('Xato'), sub: t('So`rov yuborishda xatolik yuz berdi') } } })
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -118,11 +124,23 @@ export default function TopUpScreen() {
     <div className="w-full lg:max-w-lg lg:h-full lg:overflow-y-auto no-scroll">
       {/* Header */}
       <div className="bg-gradient-to-br from-[#1251C5] to-[#1E6FD9] px-5 pt-4 pb-8 rounded-b-[28px] shrink-0 shadow-lg">
-        <div className="flex items-center gap-3 mb-4">
-          <button onClick={back} className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
-            <svg viewBox="0 0 24 24" className="w-[19px] h-[19px] stroke-white stroke-2 fill-none stroke-linecap-round"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          <h1 className="text-white text-[20px] font-extrabold">{t("Balans to'ldirish")}</h1>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <button onClick={back} className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
+              <svg viewBox="0 0 24 24" className="w-[19px] h-[19px] stroke-white stroke-2 fill-none stroke-linecap-round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <h1 className="text-white text-[20px] font-extrabold">{t("Balans to'ldirish")}</h1>
+          </div>
+          <div className="relative">
+            <select value={state.lang} onChange={e => dispatch({ type: 'SET_LANG', lang: e.target.value })} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full appearance-none">
+              <option value="uz">UZ</option>
+              <option value="kir">КР</option>
+              <option value="ru">RU</option>
+            </select>
+            <div className="bg-white/20 text-white font-bold py-1.5 px-3 rounded-lg text-[13px] flex items-center gap-1 border border-white/5">
+              🌍 {state.lang.toUpperCase()}
+            </div>
+          </div>
         </div>
         <div className="bg-white/15 rounded-[24px] px-5 py-4 flex items-center justify-between border border-white/10 backdrop-blur-sm">
           <div>
@@ -189,7 +207,7 @@ export default function TopUpScreen() {
                    </div>
                    <div className="text-right">
                       <div className="text-white font-black italic text-[20px] tracking-tight">{getCardType(card)}</div>
-                      <div className="text-white/40 text-[8px] font-black uppercase tracking-[2px]">TezUsta payment</div>
+                      <div className="text-white/40 text-[8px] font-black uppercase tracking-[2px]">zentro payment</div>
                    </div>
                 </div>
                 
@@ -241,8 +259,9 @@ export default function TopUpScreen() {
                 <input type="file" accept="image/*,.pdf" className="hidden" onChange={handleCheckUpload} />
               </label>
             </div>
-            <button onClick={submitRequest} className="w-full bg-gradient-to-br from-[#1E6FD9] to-[#1251C5] text-white font-black py-5 rounded-[24px] text-[16px] shadow-xl shadow-blue-100 active:scale-95 transition-all">
-              {t("📤 So'rovni yuborish")}
+            <button disabled={submitting} onClick={submitRequest} className={`w-full bg-gradient-to-br from-[#1E6FD9] to-[#1251C5] text-white font-black py-5 rounded-[24px] text-[16px] shadow-xl shadow-blue-100 active:scale-95 transition-all flex items-center justify-center gap-3 ${submitting ? 'opacity-70 cursor-not-allowed' : ''}`}>
+              {submitting && <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+              {submitting ? t('Yuklanmoqda...') : t("📤 So'rovni yuborish")}
             </button>
           </div>
         )}

@@ -1,0 +1,196 @@
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+.splash{width:100%;height:520px;background:#0d1f17;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;border-radius:16px;position:relative;}
+.bg-circle{position:absolute;border-radius:50%;background:rgba(29,158,117,0.06);}
+.bc1{width:400px;height:400px;top:50%;left:50%;transform:translate(-50%,-50%);}
+.bc2{width:600px;height:600px;top:50%;left:50%;transform:translate(-50%,-50%);}
+.logo-wrap{display:flex;align-items:center;gap:20px;margin-bottom:18px;}
+.icon-box{width:72px;height:72px;background:#1D9E75;border-radius:16px;display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(0.4) rotate(-15deg);position:relative;}
+.z-letter{position:relative;width:40px;height:40px;}
+.z-top{position:absolute;top:4px;left:4px;width:32px;height:8px;background:white;border-radius:3px;}
+.z-diag{position:absolute;top:0;left:0;width:40px;height:40px;}
+.z-bot{position:absolute;bottom:4px;left:4px;width:32px;height:8px;background:white;border-radius:3px;}
+.letters{display:flex;gap:2px;}
+.letter{font-family:Georgia,serif;font-size:52px;font-weight:700;color:white;opacity:0;transform:translateY(30px);display:inline-block;line-height:1;}
+.tagline{font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;letter-spacing:5px;color:#5DCAA5;opacity:0;transform:translateY(10px);}
+.dot{width:6px;height:6px;border-radius:50%;background:#9FE1CB;position:absolute;top:10px;right:10px;opacity:0;}
+.progress-bar{position:absolute;bottom:50px;width:80px;height:2px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;width:0%;background:#1D9E75;border-radius:2px;}
+
+.home{display:none;width:100%;height:520px;background:#f4f6f4;border-radius:16px;flex-direction:column;}
+.home-nav{background:white;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid #e0e0e0;}
+.nav-logo{font-family:Georgia,serif;font-size:20px;font-weight:700;color:#0A2E20;}
+.nav-logo span{color:#1D9E75;}
+.lang-switch{display:flex;gap:4px;}
+.lang-btn{border:0.5px solid #ccc;background:white;padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;color:#555;transition:all 0.2s;}
+.lang-btn.active{background:#1D9E75;color:white;border-color:#1D9E75;}
+.nav-btn{background:#1D9E75;color:white;border:none;padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;}
+.home-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px;}
+.hero-title{font-family:Georgia,serif;font-size:28px;font-weight:700;color:#0A2E20;text-align:center;opacity:0;transform:translateY(20px);}
+.hero-sub{font-size:14px;color:#666;text-align:center;opacity:0;transform:translateY(15px);}
+.search-bar{background:white;border:1.5px solid #1D9E75;border-radius:12px;padding:11px 18px;width:100%;max-width:400px;font-size:14px;color:#333;outline:none;opacity:0;transform:translateY(15px);}
+.cards{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;opacity:0;transform:translateY(15px);}
+.card{background:white;border-radius:12px;padding:14px 10px;text-align:center;width:100px;border:0.5px solid #e8e8e8;}
+.card-icon{width:36px;height:36px;background:#E1F5EE;border-radius:10px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;}
+.card-icon svg{width:18px;height:18px;}
+.card-label{font-size:11px;color:#444;font-weight:500;line-height:1.3;}
+</style>
+
+<div class="splash" id="splash">
+  <div class="bg-circle bc1"></div>
+  <div class="bg-circle bc2"></div>
+  <div class="logo-wrap">
+    <div class="icon-box" id="iconBox">
+      <div class="z-letter">
+        <div class="z-top"></div>
+        <svg class="z-diag" viewBox="0 0 40 40"><polygon points="33,8 40,8 7,32 0,32" fill="white"/></svg>
+        <div class="z-bot"></div>
+      </div>
+      <div class="dot" id="dot"></div>
+    </div>
+    <div class="letters">
+      <span class="letter" id="l0">Z</span>
+      <span class="letter" id="l1">E</span>
+      <span class="letter" id="l2">N</span>
+      <span class="letter" id="l3">T</span>
+      <span class="letter" id="l4">R</span>
+      <span class="letter" id="l5">O</span>
+    </div>
+  </div>
+  <div class="tagline" id="tagline">USTA VA XIZMAT PLATFORMASI</div>
+  <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
+</div>
+
+<div class="home" id="home">
+  <div class="home-nav">
+    <div class="nav-logo">zen<span>tro</span></div>
+    <div class="lang-switch">
+      <button class="lang-btn active" onclick="setLang('uz')">UZ</button>
+      <button class="lang-btn" onclick="setLang('кр')">КР</button>
+      <button class="lang-btn" onclick="setLang('ru')">RU</button>
+    </div>
+   
+    
+  </div>
+  <div class="home-body">
+    <div class="hero-title" id="ht">Ishonchli ustani toping</div>
+    <div class="hero-sub" id="hs">Santexnik, elektrik, remont va boshqa xizmatlar</div>
+    <input class="search-bar" id="sb" placeholder="Qanday xizmat kerak?"/>
+    <div class="cards" id="cards">
+      <div class="card">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></div>
+        <div class="card-label" id="c0">Santexnik</div>
+      </div>
+      <div class="card">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+        <div class="card-label" id="c1">Elektrik</div>
+      </div>
+      <div class="card">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+        <div class="card-label" id="c2">Remont</div>
+      </div>
+      <div class="card">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+        <div class="card-label" id="c3">Tozalash</div>
+      </div>
+      <div class="card">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg></div>
+        <div class="card-label" id="c4">Internet</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const translations={
+  uz:{
+    title:'Ishonchli ustani toping',
+    sub:'Santexnik, elektrik, remont va boshqa xizmatlar',
+    placeholder:'Qanday xizmat kerak?',
+    btn:'Kirish',
+    c0:'Santexnik',c1:'Elektrik',c2:'Remont',c3:'Tozalash',c4:'Internet'
+  },
+  кр:{
+    title:'Ишончли устани топинг',
+    sub:'Сантехник, электрик, ремонт ва бошқа хизматлар',
+    placeholder:'Қандай хизмат керак?',
+    btn:'Кириш',
+    c0:'Сантехник',c1:'Электрик',c2:'Ремонт',c3:'Тозалаш',c4:'Интернет'
+  },
+  ru:{
+    title:'Найдите надёжного мастера',
+    sub:'Сантехник, электрик, ремонт и другие услуги',
+    placeholder:'Какая услуга нужна?',
+    btn:'Войти',
+    c0:'Сантехник',c1:'Электрик',c2:'Ремонт',c3:'Уборка',c4:'Интернет'
+  }
+};
+
+function setLang(lang){
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  const t=translations[lang];
+  document.getElementById('ht').textContent=t.title;
+  document.getElementById('hs').textContent=t.sub;
+  document.getElementById('sb').placeholder=t.placeholder;
+  document.getElementById('navBtn').textContent=t.btn;
+  for(let i=0;i<5;i++) document.getElementById('c'+i).textContent=t['c'+i];
+}
+
+function ease(t){return t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
+function animate(el,from,to,dur,delay,prop,unit,cb){
+  setTimeout(()=>{
+    const start=performance.now();
+    function frame(now){
+      const p=Math.min((now-start)/dur,1);
+      const v=from+(to-from)*ease(p);
+      if(prop==='opacity')el.style.opacity=v;
+      else if(prop==='translateY')el.style.transform=`translateY(${v}${unit})`;
+      else if(prop==='scale')el.style.transform=`scale(${v}) rotate(${(1-p)*-15}deg)`;
+      else if(prop==='width')el.style.width=v+unit;
+      if(p<1)requestAnimationFrame(frame);
+      else if(cb)cb();
+    }
+    requestAnimationFrame(frame);
+  },delay);
+}
+
+const iconBox=document.getElementById('iconBox');
+const dot=document.getElementById('dot');
+const tagline=document.getElementById('tagline');
+const prog=document.getElementById('prog');
+const splash=document.getElementById('splash');
+const home=document.getElementById('home');
+
+animate(iconBox,0,1,600,300,'opacity','',null);
+animate(iconBox,0.4,1,600,300,'scale','',()=>{animate(dot,0,1,300,0,'opacity','',null);});
+
+['l0','l1','l2','l3','l4','l5'].forEach((id,i)=>{
+  const el=document.getElementById(id);
+  animate(el,0,1,400,600+i*80,'opacity','',null);
+  animate(el,30,0,400,600+i*80,'translateY','px',null);
+});
+
+animate(tagline,0,1,500,1400,'opacity','',null);
+animate(tagline,10,0,500,1400,'translateY','px',null);
+
+animate(prog,0,100,1800,800,'width','%',()=>{
+  setTimeout(()=>{
+    splash.style.transition='opacity 0.5s';
+    splash.style.opacity='0';
+    setTimeout(()=>{
+      splash.style.display='none';
+      home.style.display='flex';
+      const els=[
+        {id:'ht',d:100},{id:'hs',d:250},{id:'sb',d:400},{id:'cards',d:550}
+      ];
+      els.forEach(({id,d})=>{
+        const el=document.getElementById(id);
+        animate(el,0,1,500,d,'opacity','',null);
+        animate(el,20,0,500,d,'translateY','px',null);
+      });
+    },500);
+  },400);
+});
+</script>

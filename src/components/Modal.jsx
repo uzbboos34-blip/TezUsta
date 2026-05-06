@@ -1,5 +1,5 @@
 import { useApp } from '../context'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { DB, fmt } from '../data'
 import { useT } from '../i18n'
 import { jobsApi } from '../api'
@@ -10,6 +10,14 @@ export default function Modal() {
   const [tempPrice, setTempPrice] = useState('')
   const [loading, setLoading] = useState(false)
   const t = useT()
+
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') close()
+    }
+    window.addEventListener('keydown', handleEsc)
+    return () => window.removeEventListener('keydown', handleEsc)
+  }, [])
 
   if (!state.modal) return null
 
@@ -50,8 +58,8 @@ export default function Modal() {
     }
 
     return (
-      <div className="fixed inset-0 bg-[#0F172A]/40 z-[9999] backdrop-blur-[8px] flex items-center justify-center p-6 animate-in fade-in duration-300">
-        <div className="bg-white rounded-[40px] p-8 w-full max-w-[360px] text-center shadow-[0_25px_60px_rgba(0,0,0,0.25)] modal-pop border border-white/20">
+      <div onClick={close} className="fixed inset-0 bg-[#0F172A]/40 z-[9999] backdrop-blur-[8px] flex items-center justify-center p-6 animate-in fade-in duration-300">
+        <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-[40px] p-8 w-full max-w-[360px] text-center shadow-[0_25px_60px_rgba(0,0,0,0.25)] modal-pop border border-white/20">
           <div className="text-[64px] mb-4 drop-shadow-sm">💰</div>
           <div className="text-[22px] font-[900] text-[#1A202C] mb-2 tracking-tight">{t('Yakuniy narx')}</div>
           <div className="text-[14px] text-[#64748B] leading-relaxed mb-6 font-medium px-2">
@@ -87,8 +95,8 @@ export default function Modal() {
 
   if (type === 'general') {
     return (
-      <div className="fixed inset-0 bg-[#0F172A]/40 z-[9999] backdrop-blur-[8px] flex items-center justify-center p-6 animate-in fade-in duration-300">
-        <div className="bg-white rounded-[32px] p-8 w-full max-w-[340px] text-center shadow-[0_20px_50px_rgba(0,0,0,0.2)] modal-pop border border-white/20">
+      <div onClick={close} className="fixed inset-0 bg-[#0F172A]/40 z-[9999] backdrop-blur-[8px] flex items-center justify-center p-6 animate-in fade-in duration-300">
+        <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-[32px] p-8 w-full max-w-[340px] text-center shadow-[0_20px_50px_rgba(0,0,0,0.2)] modal-pop border border-white/20">
           <div className="text-[64px] mb-4 drop-shadow-sm">{data.icon}</div>
           <div className="text-[24px] font-[900] text-[#1A202C] mb-3 tracking-tight leading-tight">{data.title}</div>
           <div className="text-[15px] text-[#64748B] leading-relaxed mb-8 font-medium px-2">{data.sub}</div>
@@ -124,8 +132,8 @@ export default function Modal() {
     }
 
     return (
-      <div className="fixed inset-0 bg-[#0F172A]/40 z-[9999] backdrop-blur-[8px] flex items-center justify-center p-6 animate-in fade-in duration-300">
-        <div className="bg-white rounded-[40px] p-8 w-full max-w-[360px] text-center shadow-[0_25px_60px_rgba(0,0,0,0.25)] modal-pop border border-white/20">
+      <div onClick={close} className="fixed inset-0 bg-[#0F172A]/40 z-[9999] backdrop-blur-[8px] flex items-center justify-center p-6 animate-in fade-in duration-300">
+        <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-[40px] p-8 w-full max-w-[360px] text-center shadow-[0_25px_60px_rgba(0,0,0,0.25)] modal-pop border border-white/20">
           <div className="text-[64px] mb-4 drop-shadow-sm">{data.isConfirmation ? '👷' : '⭐'}</div>
           <div className="text-[22px] font-[900] text-[#1A202C] mb-2 tracking-tight">{data.isConfirmation ? t('Ishni qabul qiling') : t('Ustani baholang')}</div>
           
@@ -186,8 +194,8 @@ export default function Modal() {
     }
 
     return (
-      <div className="absolute inset-0 bg-black/50 z-[200] backdrop-blur-sm flex items-end justify-center sm:items-center">
-        <div className="bg-white rounded-t-[32px] sm:rounded-3xl p-6 w-full max-w-sm text-center shadow-2xl modal-pop pb-10 sm:pb-6 relative animate-slide-up">
+      <div onClick={close} className="absolute inset-0 bg-black/50 z-[200] backdrop-blur-sm flex items-end justify-center sm:items-center">
+        <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-t-[32px] sm:rounded-3xl p-6 w-full max-w-sm text-center shadow-2xl modal-pop pb-10 sm:pb-6 relative animate-slide-up">
           <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-6 sm:hidden"></div>
           <div className="text-[48px] mb-2 leading-none">🎧</div>
           <div className="text-[20px] font-extrabold text-[#1A202C] mb-6">{t("Operator bilan aloqa")}</div>

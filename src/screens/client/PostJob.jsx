@@ -3,6 +3,7 @@ import { useApp } from '../../context'
 import { getActiveSkills } from '../../data'
 import { useT } from '../../i18n'
 import { jobsApi } from '../../api'
+import RegionSelect from '../../components/RegionSelect'
 
 const Field = ({ label, children }) => (
   <div className="flex flex-col gap-1.5">{label && <label className="text-[13px] font-bold text-[#718096]">{label}</label>}{children}</div>
@@ -11,7 +12,8 @@ const Field = ({ label, children }) => (
 export default function PostJob() {
   const { state, dispatch } = useApp()
   const t = useT()
-  const { editJobId, categories } = state
+  const { editJobId, categories: stateCats } = state
+  const categories = (stateCats?.length > 0) ? stateCats : getActiveSkills().map(s => ({ id: s.key, name: s.name, icon: s.icon, status: 'active' }))
 
   const [name, setName] = useState('')
   const [desc, setDesc] = useState('')
@@ -24,6 +26,8 @@ export default function PostJob() {
   const [showMap, setShowMap] = useState(false)
   const [lat, setLat] = useState(41.2995)
   const [lng, setLng] = useState(69.2401)
+  const [region, setRegion] = useState(state.user?.region || '')
+  const [dist, setDist] = useState(state.user?.district || '')
   const [tempAddr, setTempAddr] = useState('')
   const [loadingAddr, setLoadingAddr] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -39,6 +43,52 @@ export default function PostJob() {
       if (data && data.display_name) {
         const parts = data.display_name.split(', ')
         setTempAddr(parts.slice(0, 3).join(', '))
+        
+        // Auto-detect region and district
+        import('../../regions').then(({ REGIONS }) => {
+          const addrObj = data.address || {}
+          
+          const normalize = (s) => s.toLowerCase()
+            .replace(/['`]/g, '')
+            .replace(/sh/g, 'sh').replace(/ch/g, 'ch').replace(/kh/g, 'x').replace(/x/g, 'x')
+            .replace(/q/g, 'k').replace(/o/g, 'a')
+            .replace(/ district| region| province| shahri| viloyati| tumani| city/g, '')
+            .trim()
+
+          const fullAddr = normalize(data.display_name)
+
+          // 1. Find region
+          let matchedRegion = REGIONS.find(r => {
+            const rn = normalize(r.name)
+            const sn = normalize(addrObj.state || addrObj.region || addrObj.province || '')
+            return sn.includes(rn) || rn.includes(sn) || fullAddr.includes(rn) || (rn === 'toshkent' && fullAddr.includes('tashkent'))
+          })
+          
+          if (matchedRegion) {
+            setRegion(matchedRegion.id)
+            // 2. Find district
+            const cn = normalize(addrObj.county || addrObj.city_district || addrObj.town || addrObj.city || '')
+            const matchedDist = matchedRegion.districts.find(d => {
+              const dn = normalize(d)
+              return cn.includes(dn) || dn.includes(cn) || fullAddr.includes(dn)
+            })
+            if (matchedDist) setDist(matchedDist)
+          } else {
+            // Fallback: search across all regions for a district match
+            for (const r of REGIONS) {
+              const cn = normalize(addrObj.county || addrObj.city_district || addrObj.town || addrObj.city || '')
+              const matchedDist = r.districts.find(d => {
+                const dn = normalize(d)
+                return cn.includes(dn) || dn.includes(cn) || fullAddr.includes(dn)
+              })
+              if (matchedDist) {
+                setRegion(r.id)
+                setDist(matchedDist)
+                break
+              }
+            }
+          }
+        })
       } else {
         setTempAddr(t('Tanlangan nuqta'))
       }
@@ -108,6 +158,7 @@ export default function PostJob() {
       setBudget(j.price === 0 ? '' : j.price.toString())
       setRequiredWorkers(j.requiredWorkers || 1)
       setLat(j.lat || 41.2995); setLng(j.lng || 69.2401)
+      setRegion(j.region || ''); setDist(j.dist || '')
       if (j.dueDate) {
         const d = new Date(j.dueDate);
         // format to YYYY-MM-DDThh:mm
@@ -154,6 +205,7 @@ export default function PostJob() {
         phone: phone || state.user.phone,
         date: formattedDate,
         desc: desc || '—', lat, lng,
+        region, dist,
         requiredWorkers,
         ...(isoDate && { dueDate: isoDate })
       }
@@ -171,7 +223,7 @@ export default function PostJob() {
         dispatch({ type: 'GO', screen: 'client-home' })
       }
     } catch (e) {
-      alert(t('Xato yuz berdi'))
+      alert(e.response?.data?.message || t('Xato yuz berdi'))
     } finally {
       setLoading(false)
     }
@@ -258,9 +310,11 @@ export default function PostJob() {
             </div>
           </Field>
           <Field label={t('Manzil *')}>
-            <div className="flex gap-2">
-              <input value={addr} onChange={e => setAddr(e.target.value)} className={`${inputCls} flex-1`} placeholder={t("Ko'cha, uy raqami")} />
-              <button onClick={() => setShowMap(true)} className="bg-[#EBF3FF] border border-[#BFDBFE] text-[#1E6FD9] px-4 rounded-xl font-bold flex items-center justify-center shrink-0">📍 {t('Xarita')}</button>
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <input value={addr} onChange={e => setAddr(e.target.value)} className={`${inputCls} flex-1`} placeholder={t("Ko'cha, uy raqami")} />
+                <button onClick={() => setShowMap(true)} className="bg-[#EBF3FF] border border-[#BFDBFE] text-[#1E6FD9] px-4 rounded-xl font-bold flex items-center justify-center shrink-0">📍 {t('Xarita')}</button>
+              </div>
             </div>
           </Field>
           <Field label={t('Telefon raqam')}>
@@ -343,9 +397,11 @@ export default function PostJob() {
                 </Field>
                 <div className="col-span-2">
                   <Field label={t('Manzil *')}>
-                    <div className="flex gap-2">
-                      <input value={addr} onChange={e => setAddr(e.target.value)} className={`${inputCls} flex-1`} placeholder={t("Ko'cha, uy raqami")} />
-                      <button onClick={() => setShowMap(true)} className="bg-[#EBF3FF] border border-[#BFDBFE] text-[#1E6FD9] px-5 rounded-xl font-bold flex items-center gap-2 whitespace-nowrap hover:bg-[#DBEAFE] transition-colors">📍 {t('Xaritadan tanlash')}</button>
+                    <div className="flex flex-col gap-3">
+                      <div className="flex gap-2">
+                        <input value={addr} onChange={e => setAddr(e.target.value)} className={`${inputCls} flex-1`} placeholder={t("Ko'cha, uy raqami")} />
+                        <button onClick={() => setShowMap(true)} className="bg-[#EBF3FF] border border-[#BFDBFE] text-[#1E6FD9] px-5 rounded-xl font-bold flex items-center gap-2 whitespace-nowrap hover:bg-[#DBEAFE] transition-colors">📍 {t('Xaritadan tanlash')}</button>
+                      </div>
                     </div>
                   </Field>
                 </div>

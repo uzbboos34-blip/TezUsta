@@ -10,7 +10,7 @@ export default function RegionSelect({ region, district, onRegion, onDistrict, l
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex flex-col gap-1.5">
-        <label className="text-[13px] font-semibold text-[#718096]">{t("🗺️ Viloyat")}</label>
+        <label className="text-[13px] font-semibold text-[#718096]">{t("Viloyat")}</label>
         <select
           value={region}
           onChange={e => { onRegion(e.target.value); onDistrict('') }}
@@ -25,7 +25,7 @@ export default function RegionSelect({ region, district, onRegion, onDistrict, l
 
       {region && (
         <div className="flex flex-col gap-1.5">
-          <label className="text-[13px] font-semibold text-[#718096]">{t("📍 Tuman / Shahar")}</label>
+          <label className="text-[13px] font-semibold text-[#718096]">{t("Tuman / Shahar")}</label>
           <select
             value={district}
             onChange={e => onDistrict(e.target.value)}

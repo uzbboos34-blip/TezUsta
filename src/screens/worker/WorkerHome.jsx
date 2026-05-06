@@ -31,27 +31,13 @@ export default function WorkerHome() {
   const fetchJobs = async (silent = false) => {
     if (!silent) setLoading(true);
     try {
-      const { data } = await jobsApi.getAll(
-        filterCat === "all" ? undefined : filterCat,
-      );
-      // Filter by region/district on client side for now, or update backend to handle it
-      let filtered = data;
-
-      if (filterRegion) {
-        filtered = filtered.filter((j) => j.client?.region === filterRegion);
-      }
-      if (filterDistrict) {
-        filtered = filtered.filter(
-          (j) => j.client?.district === filterDistrict,
-        );
-      }
-      if (searchQ) {
-        filtered = filtered.filter((j) =>
-          j.title.toLowerCase().includes(searchQ.toLowerCase()),
-        );
-      }
-
-      setJobs(filtered);
+      const { data } = await jobsApi.getAll({
+        cat: filterCat === "all" ? undefined : filterCat,
+        q: searchQ || undefined,
+        region: filterRegion || undefined,
+        district: filterDistrict || undefined,
+      });
+      setJobs(data);
     } catch (e) {
       console.error(e);
     } finally {
@@ -96,18 +82,30 @@ export default function WorkerHome() {
       <div className="lg:hidden bg-gradient-to-br from-[#1251C5] to-[#1E6FD9] px-5 pt-4 pb-6 rounded-b-[24px] shrink-0">
         <div className="flex justify-between items-center">
           <div className="text-[22px] font-extrabold text-white">
-            Tez<span className="text-[#22C55E]">Usta</span>
+            zen<span className="text-[#22C55E]">tro</span>
           </div>
-          <button onClick={() => dispatch({ type: 'SHOW_MODAL', modal: { type: 'general', data: { icon: '🔔', title: t("Bildirishnomalar"), sub: t("Hozircha yangi bildirishnomalar yo'q") } } })} className="relative w-9 h-9 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
-            <svg
-              viewBox="0 0 24 24"
-              className="w-5 h-5 stroke-white fill-none stroke-2 stroke-linecap-round"
-            >
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-            </svg>
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#22C55E] rounded-full border border-[#1251C5]"></span>
-          </button>
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <select value={state.lang} onChange={e => dispatch({ type: 'SET_LANG', lang: e.target.value })} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full appearance-none">
+                <option value="uz">UZ</option>
+                <option value="kir">КР</option>
+                <option value="ru">RU</option>
+              </select>
+              <div className="bg-white/20 text-white font-bold py-1.5 px-3 rounded-lg text-[13px] flex items-center gap-1">
+                🌍 {state.lang.toUpperCase()}
+              </div>
+            </div>
+            <button onClick={() => dispatch({ type: 'SHOW_MODAL', modal: { type: 'general', data: { icon: '🔔', title: t("Bildirishnomalar"), sub: t("Hozircha yangi bildirishnomalar yo'q") } } })} className="relative w-9 h-9 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
+              <svg
+                viewBox="0 0 24 24"
+                className="w-5 h-5 stroke-white fill-none stroke-2 stroke-linecap-round"
+              >
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#22C55E] rounded-full border border-[#1251C5]"></span>
+            </button>
+          </div>
         </div>
         <div className="text-[13px] text-white/85 mt-0.5">
           {t("Salom")}, {user?.name?.split(" ")[0]} 👋
@@ -189,14 +187,26 @@ export default function WorkerHome() {
 
       {/* ── Desktop header ── */}
       <div className="hidden lg:flex items-center justify-between px-8 py-5 bg-white border-b border-[#E8EDF5] shrink-0">
-        <div>
-          <h1 className="text-[22px] font-extrabold text-[#1A202C]">
-            {t("Ish topish")}
-          </h1>
-          <p className="text-[13px] text-[#718096] mt-0.5">
-            {t("Salom")}, {user?.name?.split(" ")[0]} 👋 —{" "}
-            {t("Kasbingizga mos ishlar")}
-          </p>
+        <div className="flex items-center gap-6">
+          <div>
+            <h1 className="text-[22px] font-extrabold text-[#1A202C]">
+              {t("Ish topish")}
+            </h1>
+            <p className="text-[13px] text-[#718096] mt-0.5">
+              {t("Salom")}, {user?.name?.split(" ")[0]} 👋 —{" "}
+              {t("Kasbingizga mos ishlar")}
+            </p>
+          </div>
+          <div className="relative">
+            <select value={state.lang} onChange={e => dispatch({ type: 'SET_LANG', lang: e.target.value })} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full appearance-none">
+              <option value="uz">O'zbek</option>
+              <option value="kir">Ўзбекча</option>
+              <option value="ru">Русский</option>
+            </select>
+            <div className="bg-[#F4F7FB] border border-[#E8EDF5] text-[#1A202C] font-bold py-2 px-4 rounded-xl text-[13px] flex items-center gap-2 hover:bg-gray-50 transition-colors">
+              🌍 {state.lang.toUpperCase()}
+            </div>
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 bg-[#F4F7FB] border border-[#E8EDF5] rounded-xl px-4 py-2.5 w-72">

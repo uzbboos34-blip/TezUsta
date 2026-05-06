@@ -90,7 +90,7 @@ export default function ClientNav({ sidebar = false }) {
               fontFamily: "inherit",
             }}
           >
-            Tez<span style={{ color: "#22C55E" }}>Usta</span>
+            zen<span style={{ color: "#22C55E" }}>tro</span>
           </Typography>
           <Typography
             sx={{

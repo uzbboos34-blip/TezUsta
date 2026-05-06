@@ -41,6 +41,7 @@ export default function SuperAdminScreen() {
   const [loading, setLoading] = useState(true)
   const [pages, setPages] = useState({ users:1, jobs:1, logs:1, transactions:1 })
   const [totals, setTotals] = useState({ users:0, jobs:0, logs:0, transactions:0 })
+  const [searchQueries, setSearchQueries] = useState({ users: '', jobs: '', logs: '', transactions: '' })
 
   // Admin Modal State
   const [adminModal, setAdminModal] = useState(null) // { name, phone, password }
@@ -56,9 +57,13 @@ export default function SuperAdminScreen() {
     if (!silent) setLoading(true)
     try {
       const [uR, jR, lR, tR, cR, sR, rR] = await Promise.all([
-        adminApi.getUsers(1), adminApi.getJobs(1), adminApi.getLogs(1),
-        adminApi.getTransactions(1), adminApi.getCategories(),
-        adminApi.getSettings(), adminApi.getReport()
+        adminApi.getUsers(1, searchQueries.users), 
+        adminApi.getJobs(1, searchQueries.jobs), 
+        adminApi.getLogs(1, searchQueries.logs),
+        adminApi.getTransactions(1, searchQueries.transactions), 
+        adminApi.getCategories(),
+        adminApi.getSettings(), 
+        adminApi.getReport()
       ])
       setUsers(uR.data.data); setJobs(jR.data.data)
       setLogs(lR.data.data); setTransactions(tR.data.data)
@@ -72,16 +77,35 @@ export default function SuperAdminScreen() {
   const changePage = async (type, newPage) => {
     try {
       let res
-      if (type==='users')        res = await adminApi.getUsers(newPage)
-      if (type==='jobs')         res = await adminApi.getJobs(newPage)
-      if (type==='logs')         res = await adminApi.getLogs(newPage)
-      if (type==='transactions') res = await adminApi.getTransactions(newPage)
+      const q = searchQueries[type]
+      if (type==='users')        res = await adminApi.getUsers(newPage, q)
+      if (type==='jobs')         res = await adminApi.getJobs(newPage, q)
+      if (type==='logs')         res = await adminApi.getLogs(newPage, q)
+      if (type==='transactions') res = await adminApi.getTransactions(newPage, q)
       if (!res) return
       if (type==='users')        setUsers(res.data.data)
       if (type==='jobs')         setJobs(res.data.data)
       if (type==='logs')         setLogs(res.data.data)
       if (type==='transactions') setTransactions(res.data.data)
       setPages(prev => ({ ...prev, [type]: newPage }))
+      setTotals(prev => ({ ...prev, [type]: res.data.total }))
+    } catch(e) { console.error(e) }
+  }
+
+  const handleSearch = async (type, q) => {
+    setSearchQueries(prev => ({ ...prev, [type]: q }))
+    try {
+      let res
+      if (type==='users')        res = await adminApi.getUsers(1, q)
+      if (type==='jobs')         res = await adminApi.getJobs(1, q)
+      if (type==='logs')         res = await adminApi.getLogs(1, q)
+      if (type==='transactions') res = await adminApi.getTransactions(1, q)
+      if (!res) return
+      if (type==='users')        setUsers(res.data.data)
+      if (type==='jobs')         setJobs(res.data.data)
+      if (type==='logs')         setLogs(res.data.data)
+      if (type==='transactions') setTransactions(res.data.data)
+      setPages(prev => ({ ...prev, [type]: 1 }))
       setTotals(prev => ({ ...prev, [type]: res.data.total }))
     } catch(e) { console.error(e) }
   }
@@ -143,7 +167,7 @@ export default function SuperAdminScreen() {
   const sharedProps = {
     t, fmt, getCatName, dispatch, fetchData,
     users, jobs, logs, transactions, categories, settings, report,
-    pages, totals, changePage,
+    pages, totals, changePage, searchQueries, handleSearch,
     blockUser, unblockUser, deleteUser, restoreUser,
     approveCat, deleteCat, createAdmin, showModal,
     adminApi,

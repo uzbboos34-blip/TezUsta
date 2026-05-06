@@ -6,7 +6,6 @@ import { useT } from "./i18n";
 import BlockedTimer from "./components/BlockedTimer";
 
 import LangScreen from "./screens/LangScreen";
-import RoleScreen from "./screens/RoleScreen";
 import AuthScreen from "./screens/AuthScreen";
 import WorkerHome from "./screens/worker/WorkerHome";
 import JobDetail from "./screens/worker/JobDetail";
@@ -25,7 +24,6 @@ import SuperAdminScreen from "./screens/SuperAdminScreen";
 
 const SCREENS = {
   lang: { comp: LangScreen, nav: null },
-  role: { comp: RoleScreen, nav: null },
   auth: { comp: AuthScreen, nav: null },
   "worker-home": { comp: WorkerHome, nav: "worker" },
   "job-detail": { comp: JobDetail, nav: null },

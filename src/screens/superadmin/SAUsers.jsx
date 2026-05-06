@@ -10,16 +10,14 @@ const STATUS_BADGE = {
   superadmin: 'bg-rose-50 text-rose-600',
 }
 
-export default function SAUsers({ t, fmt, getCatName, users, pages, totals, changePage, blockUser, unblockUser, deleteUser, restoreUser, createAdmin, fetchData, showModal }) {
+export default function SAUsers({ t, fmt, getCatName, users, pages, totals, changePage, searchQueries, handleSearch, blockUser, unblockUser, deleteUser, restoreUser, createAdmin, fetchData, showModal }) {
   const [userTab, setUserTab] = useState('workers')
-  const [search, setSearch] = useState('')
   const [selectedUserJobs, setSelectedUserJobs] = useState(null)
   const [ujLoading, setUjLoading] = useState(false)
 
   const filtered = users.filter(u => {
     const matchRole = userTab === 'workers' ? u.role === 'worker' : userTab === 'clients' ? u.role === 'client' : (u.role === 'admin' || u.role === 'superadmin')
-    const matchSearch = u.name.toLowerCase().includes(search.toLowerCase()) || u.phone.includes(search)
-    return matchRole && matchSearch
+    return matchRole
   })
 
   const showUserJobs = async (id) => {
@@ -64,7 +62,7 @@ export default function SAUsers({ t, fmt, getCatName, users, pages, totals, chan
         </div>
         <div className="flex-1 max-w-xs flex items-center gap-2 bg-white border border-[#E8EDF5] rounded-xl px-4 py-2.5 shadow-sm">
           <span className="text-gray-400">🔍</span>
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t("Qidiruv...")} className="flex-1 bg-transparent outline-none text-[13px] text-[#1A202C] font-bold" />
+          <input value={searchQueries.users} onChange={e => handleSearch('users', e.target.value)} placeholder={t("Qidiruv...")} className="flex-1 bg-transparent outline-none text-[13px] text-[#1A202C] font-bold" />
         </div>
       </div>
 
@@ -95,7 +93,8 @@ export default function SAUsers({ t, fmt, getCatName, users, pages, totals, chan
                     <div className="text-[13px] font-black text-[#1A202C] flex items-center gap-1.5 flex-wrap">
                       {u.name}
                       {u.isDeleted && <span className="px-1.5 py-0.5 bg-gray-100 text-gray-400 text-[8px] rounded font-black uppercase">O'chirilgan</span>}
-                      {!u.isDeleted && u.isBlocked && <span className="px-1.5 py-0.5 bg-red-100 text-red-500 text-[8px] rounded font-black uppercase">Bloklangan</span>}
+                      {!u.isDeleted && u.isBlocked && u.blockedUntil && new Date(u.blockedUntil) > new Date() && <span className="px-1.5 py-0.5 bg-red-100 text-red-500 text-[8px] rounded font-black uppercase">Bloklangan</span>}
+                      {!u.isDeleted && u.isBlocked && u.blockedUntil && new Date(u.blockedUntil) <= new Date() && <span className="px-1.5 py-0.5 bg-green-100 text-green-500 text-[8px] rounded font-black uppercase">Muddati tugagan</span>}
                     </div>
                     {u.region && <div className="text-[10px] text-[#A0AEC0] font-medium">📍 {u.region}{u.district ? `, ${u.district}` : ''}</div>}
                   </div>
@@ -125,12 +124,19 @@ export default function SAUsers({ t, fmt, getCatName, users, pages, totals, chan
                     <button onClick={() => restoreUser(u.id)} className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-[10px] font-black hover:bg-blue-700 transition-all">{t("Tiklash")}</button>
                   ) : (
                     <>
-                      <button onClick={() => blockUser(u.id)} className="px-3 py-1.5 bg-amber-100 text-amber-700 rounded-lg text-[10px] font-black hover:bg-amber-200 transition-all">
-                        {u.isBlocked ? t('Muddat') : t('Blok')}
-                      </button>
-                      {u.isBlocked && (
-                        <button onClick={() => unblockUser(u.id)} className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-[10px] font-black hover:bg-green-200 transition-all">{t("Ochish")}</button>
-                      )}
+                      {(() => {
+                        const isTrulyBlocked = u.isBlocked && u.blockedUntil && new Date(u.blockedUntil) > new Date();
+                        return (
+                          <>
+                            <button onClick={() => blockUser(u.id)} className="px-3 py-1.5 bg-amber-100 text-amber-700 rounded-lg text-[10px] font-black hover:bg-amber-200 transition-all">
+                              {isTrulyBlocked ? t('Muddat') : t('Blok')}
+                            </button>
+                            {u.isBlocked && (
+                              <button onClick={() => unblockUser(u.id)} className="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-[10px] font-black hover:bg-green-200 transition-all">{t("Ochish")}</button>
+                            )}
+                          </>
+                        );
+                      })()}
                       <button onClick={() => deleteUser(u.id)} className="w-8 h-8 bg-gray-100 text-gray-400 rounded-lg flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-colors text-[14px]">🗑️</button>
                     </>
                   )}

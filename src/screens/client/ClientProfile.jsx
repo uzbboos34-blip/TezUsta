@@ -127,9 +127,11 @@ export default function ClientProfile() {
               </button>
             )}
           </div>
-          <button onClick={() => dispatch({ type: 'SHOW_MODAL', modal: { type: 'operator' } })} className="w-full bg-white text-[#1A202C] border border-[#E8EDF5] font-bold py-[15px] rounded-[14px] hover:bg-gray-50 transition-colors shadow-sm flex items-center justify-center gap-2">
-            🎧 {t('Operator')}
-          </button>
+          <div className="mb-3">
+            <button onClick={() => dispatch({ type: 'SHOW_MODAL', modal: { type: 'operator' } })} className="w-full bg-white text-[#1A202C] border border-[#E8EDF5] font-bold py-[15px] rounded-[14px] hover:bg-gray-50 transition-colors shadow-sm flex items-center justify-center gap-2">
+              🎧 {t('Operator')}
+            </button>
+          </div>
           <button onClick={logout} className="w-full bg-[#FEE2E2] text-[#DC2626] font-bold py-[15px] rounded-[14px] hover:bg-[#FECACA] transition-colors shadow-sm">
             {t('🚪 Chiqish')}
           </button>
@@ -173,10 +175,12 @@ export default function ClientProfile() {
                   </div>
                 </div>
               </div>
-              <button onClick={() => dispatch({ type: 'SHOW_MODAL', modal: { type: 'operator' } })}
-                className="w-full bg-white text-[#1A202C] border border-[#E8EDF5] font-bold py-3 rounded-2xl hover:bg-gray-50 transition-colors shadow-sm flex items-center justify-center gap-2 text-[14px]">
-                🎧 {t('Operator')}
-              </button>
+              <div className="w-full mb-3">
+                <button onClick={() => dispatch({ type: 'SHOW_MODAL', modal: { type: 'operator' } })}
+                  className="w-full bg-white text-[#1A202C] border border-[#E8EDF5] font-bold py-3 rounded-2xl hover:bg-gray-50 transition-colors shadow-sm flex items-center justify-center gap-2 text-[14px]">
+                  🎧 {t('Operator')}
+                </button>
+              </div>
               <button onClick={logout} className="w-full bg-red-50 text-[#DC2626] font-black py-3 rounded-2xl hover:bg-red-100 transition-all shadow-sm text-[14px]">
                 {t('🚪 Chiqish')}
               </button>

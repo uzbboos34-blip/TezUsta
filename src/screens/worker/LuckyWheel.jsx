@@ -85,9 +85,21 @@ export default function LuckyWheel() {
 
       {/* ── Header ── */}
       <div className="px-5 py-4 flex items-center justify-between bg-white/5 backdrop-blur-2xl border-b border-white/5 shrink-0 z-50">
-        <button onClick={() => dispatch({ type: 'GO', screen: 'worker-home' })} className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center text-white/40">
-           <svg viewBox="0 0 24 24" className="w-5 h-5 stroke-current fill-none stroke-[2.5]"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => dispatch({ type: 'GO', screen: 'worker-home' })} className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center text-white/40">
+            <svg viewBox="0 0 24 24" className="w-5 h-5 stroke-current fill-none stroke-[2.5]"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          </button>
+          <div className="relative">
+            <select value={state.lang} onChange={e => dispatch({ type: 'SET_LANG', lang: e.target.value })} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full appearance-none">
+              <option value="uz">UZ</option>
+              <option value="kir">КР</option>
+              <option value="ru">RU</option>
+            </select>
+            <div className="bg-white/10 text-white font-bold py-1 px-2.5 rounded-lg text-[12px] flex items-center gap-1 border border-white/5">
+              🌍 {state.lang.toUpperCase()}
+            </div>
+          </div>
+        </div>
         <div className="flex items-center gap-3 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
            <span className="text-[16px]">🪙</span>
            <span className="text-[14px] font-black text-amber-500 tracking-tight">{state.user?.coins || 0}</span>

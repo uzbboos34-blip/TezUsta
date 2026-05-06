@@ -21,7 +21,7 @@ export const REGIONS = [
   },
   {
     id: 'samarqand', name: "Samarqand viloyati",
-    districts: ["Samarqand shahri","Bulung'ur","Ishtixon","Jomboy","Kattaqo'rg'on","Narpay","Nurobod","Oqdaryo","Payariq","Pastdarg'om","Qo'shrabot","Toyloq","Urgut"]
+    districts: ["Samarqand shahri","Samarqand tumani","Bulung'ur","Ishtixon","Jomboy","Kattaqo'rg'on","Narpay","Nurobod","Oqdaryo","Payariq","Pastdarg'om","Paxtachi","Qo'shrabot","Toyloq","Urgut"]
   },
   {
     id: 'buxoro', name: "Buxoro viloyati",

@@ -1,15 +1,7 @@
 import { useState } from 'react'
 import Pagination from '../../components/Pagination'
 
-export default function SATransactions({ t, fmt, transactions, pages, totals, changePage }) {
-  const [search, setSearch] = useState('')
-
-  const filteredTransactions = transactions.filter(tr => 
-    tr.user?.name?.toLowerCase().includes(search.toLowerCase()) ||
-    tr.desc?.toLowerCase().includes(search.toLowerCase()) ||
-    tr.type?.toLowerCase().includes(search.toLowerCase()) ||
-    `#${tr.id}`.includes(search)
-  )
+export default function SATransactions({ t, fmt, transactions, pages, totals, changePage, searchQueries, handleSearch }) {
   return (
     <div className="p-6 lg:p-8 flex flex-col gap-5">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -21,8 +13,8 @@ export default function SATransactions({ t, fmt, transactions, pages, totals, ch
         <div className="relative w-full md:w-80 group">
           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[18px] opacity-40 group-focus-within:opacity-100 transition-opacity">🔍</span>
           <input 
-            value={search} 
-            onChange={e => setSearch(e.target.value)} 
+            value={searchQueries.transactions} 
+            onChange={e => handleSearch('transactions', e.target.value)} 
             placeholder={t("Tranzaksiyalardan qidirish...")} 
             className="w-full bg-white border border-[#E8EDF5] rounded-2xl pl-12 pr-4 py-3 text-[13px] font-bold outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-500/5 transition-all shadow-sm" 
           />
@@ -42,12 +34,12 @@ export default function SATransactions({ t, fmt, transactions, pages, totals, ch
           </div>
 
           <div className="divide-y divide-[#F1F5F9] min-w-[580px]">
-            {filteredTransactions.length === 0 ? (
+            {transactions.length === 0 ? (
               <div className="py-20 text-center">
-                 <div className="text-[40px] mb-2 opacity-20">{search ? '🖎' : '💳'}</div>
-                 <div className="text-[#A0AEC0] font-bold text-[15px]">{search ? t("Natija topilmadi") : t("Tranzaksiyalar topilmadi")}</div>
+                 <div className="text-[40px] mb-2 opacity-20">{searchQueries.transactions ? '🖎' : '💳'}</div>
+                 <div className="text-[#A0AEC0] font-bold text-[15px]">{searchQueries.transactions ? t("Natija topilmadi") : t("Tranzaksiyalar topilmadi")}</div>
               </div>
-            ) : filteredTransactions.map(tr => (
+            ) : transactions.map(tr => (
               <div key={tr.id} className="grid grid-cols-[auto_2fr_1.5fr_1fr_1fr_1fr] gap-4 items-center px-5 py-4 hover:bg-[#F8FAFC] transition-colors">
                 <div className="text-[11px] font-black text-[#A0AEC0]">#{tr.id}</div>
 

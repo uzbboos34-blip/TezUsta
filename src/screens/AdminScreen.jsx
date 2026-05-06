@@ -52,9 +52,9 @@ export default function AdminScreen() {
     if (!silent) setLoading(true)
     try {
       const [uRes, pRes, cRes] = await Promise.all([
-        adminApi.getUsers(1),
-        adminApi.getPayments(1),
-        adminApi.getCategories()
+        adminApi.getUsers(1, search),
+        adminApi.getPayments(1, paymentSearch),
+        adminApi.getCategories(catSearch)
       ])
       setUsers(uRes.data.data)
       setPayments(pRes.data.data)
@@ -68,14 +68,39 @@ export default function AdminScreen() {
   const changePage = async (type, p) => {
     try {
       let res;
-      if (type === 'users') res = await adminApi.getUsers(p)
-      if (type === 'payments') res = await adminApi.getPayments(p)
+      if (type === 'users') res = await adminApi.getUsers(p, search)
+      if (type === 'payments') res = await adminApi.getPayments(p, paymentSearch)
 
       if (type === 'users') setUsers(res.data.data)
       if (type === 'payments') setPayments(res.data.data)
 
       setPages({ ...pages, [type]: p })
       setTotals({ ...totals, [type]: res.data.total })
+    } catch (e) { console.error(e) }
+  }
+
+  const handleSearch = async (type, q) => {
+    if (type === 'users') setSearch(q)
+    if (type === 'payments') setPaymentSearch(q)
+    if (type === 'cats') setCatSearch(q)
+
+    try {
+      if (type === 'users') {
+        const res = await adminApi.getUsers(1, q)
+        setUsers(res.data.data)
+        setTotals(prev => ({ ...prev, users: res.data.total }))
+        setPages(prev => ({ ...prev, users: 1 }))
+      }
+      if (type === 'payments') {
+        const res = await adminApi.getPayments(1, q)
+        setPayments(res.data.data)
+        setTotals(prev => ({ ...prev, payments: res.data.total }))
+        setPages(prev => ({ ...prev, payments: 1 }))
+      }
+      if (type === 'cats') {
+        const res = await adminApi.getCategories(q)
+        setCategories(res.data)
+      }
     } catch (e) { console.error(e) }
   }
 
@@ -152,29 +177,11 @@ export default function AdminScreen() {
   }
 
   const pendingPaymentsCount = payments.filter(p => p.status === 'pending').length
-  const filteredPayments = payments.filter(p => {
-    if (paymentFilter !== 'all' && p.status !== paymentFilter) return false;
-    if (paymentSearch) {
-      const s = paymentSearch.toLowerCase();
-      const n = (p.user?.name || '').toLowerCase();
-      const ph = (p.user?.phone || '');
-      if (!n.includes(s) && !ph.includes(s)) return false;
-    }
-    return true;
-  });
+  const filteredPayments = payments;
   
-  const filteredUsers = users.filter(u => {
-    if (u.role !== userTab) return false;
-    const searchLower = search.toLowerCase();
-    const nameMatch = u.name ? u.name.toLowerCase().includes(searchLower) : false;
-    const phoneMatch = u.phone ? u.phone.includes(search) : false;
-    return search === '' ? true : (nameMatch || phoneMatch);
-  })
+  const filteredUsers = users.filter(u => u.role === userTab);
 
-  const filteredCategories = categories.filter(c => 
-    c.name?.toLowerCase().includes(catSearch.toLowerCase()) ||
-    c.proposedName?.toLowerCase().includes(catSearch.toLowerCase())
-  )
+  const filteredCategories = categories;
 
   if (loading) return <div className="flex h-screen items-center justify-center bg-white font-inter text-[#64748B]">{t("Yuklanmoqda...")}</div>
 
@@ -390,7 +397,7 @@ export default function AdminScreen() {
                     <button onClick={() => setPaymentFilter('rejected')} className={`px-4 py-1.5 text-[12px] font-bold rounded-md transition-colors whitespace-nowrap ${paymentFilter === 'rejected' ? 'bg-[#FEF2F2] text-[#DC2626]' : 'text-[#64748B] hover:bg-gray-50'}`}>Bekor qilingan</button>
                   </div>
                   <div className="relative w-full md:w-[300px]">
-                    <input value={paymentSearch} onChange={e => setPaymentSearch(e.target.value)} placeholder="Ism yoki telefon orqali izlash..." className="w-full bg-white border border-[#E2E8F0] rounded-lg pl-9 pr-4 py-2 text-[13px] outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400" />
+                    <input value={paymentSearch} onChange={e => handleSearch('payments', e.target.value)} placeholder="Ism yoki telefon orqali izlash..." className="w-full bg-white border border-[#E2E8F0] rounded-lg pl-9 pr-4 py-2 text-[13px] outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400" />
                     <span className="absolute left-3 top-2.5 text-[#94A3B8] text-[12px]">🔍</span>
                   </div>
                 </div>
@@ -460,7 +467,7 @@ export default function AdminScreen() {
                   <button onClick={() => setUserTab('client')} className={`px-5 py-1.5 text-[13px] font-semibold rounded-md transition-colors ${userTab === 'client' ? 'bg-[#F1F5F9] text-[#0F172A]' : 'text-[#64748B]'}`}>Mijozlar</button>
                 </div>
                 <div className="relative w-full md:w-[300px]">
-                  <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Qidiruv..." className="w-full bg-white border border-[#E2E8F0] rounded-lg pl-9 pr-4 py-2 text-[13px] outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400" />
+                  <input value={search} onChange={e => handleSearch('users', e.target.value)} placeholder="Qidiruv..." className="w-full bg-white border border-[#E2E8F0] rounded-lg pl-9 pr-4 py-2 text-[13px] outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400" />
                   <span className="absolute left-3 top-2.5 text-[#94A3B8] text-[12px]">🔍</span>
                 </div>
               </div>
@@ -515,7 +522,7 @@ export default function AdminScreen() {
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                  <div className="relative w-full md:w-80">
                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B] text-[16px]">🔍</span>
-                   <input value={catSearch} onChange={e => setCatSearch(e.target.value)} placeholder="Sohalardan qidirish..." className="w-full bg-white border border-[#E2E8F0] rounded-xl pl-10 pr-4 py-2.5 text-[13px] font-semibold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all shadow-sm" />
+                   <input value={catSearch} onChange={e => handleSearch('cats', e.target.value)} placeholder="Sohalardan qidirish..." className="w-full bg-white border border-[#E2E8F0] rounded-xl pl-10 pr-4 py-2.5 text-[13px] font-semibold outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all shadow-sm" />
                  </div>
                  <button onClick={() => { setEditId(null); setNewCat(''); setNewIcon(''); setShowCatModal(true); }} className="bg-[#2563EB] text-white px-5 py-2.5 rounded-xl text-[13px] font-bold shadow-sm hover:bg-blue-600 transition-all active:scale-95 whitespace-nowrap">
                    + Yangi soha taklif qilish

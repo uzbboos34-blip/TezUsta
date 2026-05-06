@@ -49,8 +49,8 @@ export default function TransactionHistory() {
   }
 
   const HistoryItem = ({ h }) => {
-    const isIncome = (h.hType === 'request') || (h.hType === 'transaction' && h.type === 'topup')
-    const isOk = h.status === 'approved' || h.hType === 'transaction'
+    const isIncome = h.hType === 'transaction' && h.type === 'topup'
+    const isExpense = h.hType === 'transaction' && h.type !== 'topup'
     const isRej = h.status === 'rejected'
     const isPending = h.status === 'pending'
     
@@ -77,9 +77,9 @@ export default function TransactionHistory() {
     }
 
     const title = h.hType === 'request' ? (isRej ? "TO'LOV RAD ETILDI" : isPending ? "TO'LOV KUTILMOQDA" : "TO'LOV SO'ROVI") : (isIncome ? "HISOB TO'LDIRILDI" : "XIZMAT HAQI YECHILDI")
-    const subtitle = isRej ? "Qabul qilinmadi" : isPending ? "Jarayonda" : (h.desc || "Tashqi operatsiya •7617")
-    const amountStr = isIncome ? `+${fmt(h.amount)}` : `-${fmt(h.amount)}`
-    const amountColor = isIncome ? 'text-[#16A34A]' : 'text-[#1A202C]'
+    const subtitle = isRej ? "Qabul qilinmadi" : isPending ? "Jarayonda" : (h.desc || "Tashqi operatsiya")
+    const amountStr = isExpense ? `-${fmt(h.amount)}` : `+${fmt(h.amount)}`
+    const amountColor = isIncome ? 'text-[#16A34A]' : (isRej ? 'text-red-500' : (isExpense ? 'text-[#1A202C]' : 'text-[#718096]'))
     
     const time = new Date(h.createdAt).toLocaleTimeString('uz-Latn', { hour: '2-digit', minute: '2-digit' })
 
@@ -107,8 +107,13 @@ export default function TransactionHistory() {
     const date = new Date(h.createdAt)
     if (date.getMonth() !== currentDate.getMonth() || date.getFullYear() !== currentDate.getFullYear()) return false
     
-    const isIncome = (h.hType === 'request') || (h.hType === 'transaction' && h.type === 'topup')
-    if (activeTab === 'expenses' && isIncome) return false
+    const isIncome = h.hType === 'transaction' && h.type === 'topup'
+    const isExpense = h.hType === 'transaction' && h.type !== 'topup'
+    
+    // Hide requests that are not rejected (approved ones are redundant with transactions, pending ones are not wanted)
+    if (h.hType === 'request' && h.status !== 'rejected') return false
+    
+    if (activeTab === 'expenses' && !isExpense) return false
     if (activeTab === 'topups' && !isIncome) return false
 
     if (searchQuery) {
@@ -124,8 +129,8 @@ export default function TransactionHistory() {
     const date = new Date(h.createdAt)
     if (date.getMonth() !== currentDate.getMonth() || date.getFullYear() !== currentDate.getFullYear()) return acc
     
-    const isIncome = (h.hType === 'request') || (h.hType === 'transaction' && h.type === 'topup')
-    if (!isIncome && h.status !== 'rejected') {
+    const isIncome = (h.hType === 'transaction' && h.type === 'topup')
+    if (!isIncome && h.hType === 'transaction') {
       return acc + h.amount
     }
     return acc
@@ -147,9 +152,21 @@ export default function TransactionHistory() {
               </button>
               <h1 className="text-[22px] lg:text-[24px] font-black text-[#1A202C] tracking-wide">{t("Tarix")}</h1>
             </div>
-            <button onClick={() => setShowSearch(!showSearch)} className="w-8 h-8 flex items-center justify-center bg-[#F1F5F9] rounded-full active:scale-95 transition-transform hover:bg-[#E8EDF5]">
-              {showSearch ? <svg viewBox="0 0 24 24" className="w-5 h-5 stroke-[#1A202C] stroke-[2] fill-none stroke-linecap-round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> : <svg viewBox="0 0 24 24" className="w-5 h-5 stroke-[#1A202C] stroke-[2] fill-none stroke-linecap-round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>}
-            </button>
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <select value={state.lang} onChange={e => dispatch({ type: 'SET_LANG', lang: e.target.value })} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full appearance-none">
+                  <option value="uz">UZ</option>
+                  <option value="kir">КР</option>
+                  <option value="ru">RU</option>
+                </select>
+                <div className="bg-[#F4F7FB] border border-[#E8EDF5] text-[#1A202C] font-bold py-1.5 px-2.5 rounded-lg text-[12px] flex items-center gap-1 shadow-sm">
+                  🌍 {state.lang.toUpperCase()}
+                </div>
+              </div>
+              <button onClick={() => setShowSearch(!showSearch)} className="w-8 h-8 flex items-center justify-center bg-[#F1F5F9] rounded-full active:scale-95 transition-transform hover:bg-[#E8EDF5]">
+                {showSearch ? <svg viewBox="0 0 24 24" className="w-5 h-5 stroke-[#1A202C] stroke-[2] fill-none stroke-linecap-round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> : <svg viewBox="0 0 24 24" className="w-5 h-5 stroke-[#1A202C] stroke-[2] fill-none stroke-linecap-round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>}
+              </button>
+            </div>
           </div>
 
           {showSearch && (
